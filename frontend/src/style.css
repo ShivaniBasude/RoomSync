@@ -1,0 +1,141 @@
+body{
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    color: #333;
+}
+
+/*Navbar*/
+.navbar {
+  background: #2563eb;
+  padding: 15px 30px;
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.navbar a:hover {
+  color: #dbeafe;
+}
+
+/* Home Page */
+
+.home {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.home h1 {
+  font-size: 40px;
+  color: #1e3a8a;
+  margin-bottom: 20px;
+}
+
+.home p {
+  font-size: 18px;
+  color: #555;
+}
+
+/*Main Container*/
+
+.container{
+    width: 85%;
+    max-width: 900px;
+    margin: auto;
+    margin-top: 50px;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+
+/*Headers*/
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-header h2 {
+  color: #1e3a8a;
+}
+
+/*Forms*/
+
+form {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+/*Button*/
+
+button{
+    padding: 10px 20px;
+    margin-top: 15px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover{
+    background: #1d4ed8;
+}
+
+/*Card*/
+.card {
+  background: white;
+  padding: 18px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card h3 {
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.card p {
+  margin-top: 5px;
+  color: #555;
+}
+
+/* Allocation */
+
+.allocation-card {
+  background: white;
+  padding: 20px;
+  border-left: 5px solid #2563eb;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
+}
+
