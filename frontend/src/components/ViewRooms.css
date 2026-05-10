@@ -1,0 +1,85 @@
+/* ViewRooms.css */
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.rooms-grid--compact {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.room-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.room-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.room-card-number {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.room-card-type {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    margin-top: 2px;
+}
+
+.room-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.room-occupancy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.room-occupancy-track {
+    height: 4px;
+    background: var(--paper-alt);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.room-occupancy-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 600ms var(--ease);
+}
+
+.room-occupancy-label {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+}
+
+.room-meta {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+}
+
+.room-amenities {
+    font-style: italic;
+}
+
+.room-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+    border-top: 1px solid var(--paper-alt);
+}
