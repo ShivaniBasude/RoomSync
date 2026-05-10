@@ -1,117 +1,244 @@
-/* Rooms.css — also contains shared page patterns */
+/* Rooms.css */
 
-/* Page header */
-.page-header {
+/* Toolbar */
+.rooms-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+    flex-wrap: wrap;
+}
+
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    padding-left: 38px;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: var(--space-1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 3px;
+}
+
+.filter-tab {
+    padding: 6px 16px;
+    border-radius: calc(var(--radius-md) - 2px);
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filter-tab.active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-tab:not(.active):hover {
+    background: var(--color-surface-2);
+    color: var(--color-primary);
+}
+
+/* Grid */
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-5);
+}
+
+/* Room card */
+.room-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    animation: pageFadeIn 0.4s ease both;
+    transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.room-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.room-card-top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: var(--space-3);
 }
 
-/* Toolbar */
-.toolbar {
+.room-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.room-number {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.room-floor {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    margin-top: -8px;
+}
+
+.room-occupancy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.room-occ-bar-bg {
+    height: 6px;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.room-occ-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.room-occ-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.room-card-actions {
+    display: flex;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 43, 60, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 24px;
+    justify-content: center;
+    padding: var(--space-4);
+    animation: fadeIn 0.2s ease;
 }
 
-.toolbar .search-bar-wrap {
-    flex: 1;
-    min-width: 200px;
-    max-width: 320px;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
-/* Filter pills */
-.filter-pills {
+.modal-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 480px;
+    animation: slideUp 0.25s ease;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
 }
 
-.filter-pill {
-    padding: 6px 16px;
-    border-radius: 99px;
-    border: 1.5px solid var(--paper-alt);
-    background: #fff;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--ink-muted);
-    cursor: pointer;
-    transition: all var(--dur) var(--ease);
-    font-family: var(--font-body);
+.modal-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-primary);
 }
 
-.filter-pill:hover {
-    border-color: var(--ink-muted);
-    color: var(--ink);
+.modal-body {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
 }
 
-.filter-pill--active {
-    background: var(--ink);
-    color: var(--cream);
-    border-color: var(--ink);
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
-/* Skeleton loading */
-.loading-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
-}
-
-.skeleton-card {
-    height: 160px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(90deg, var(--paper-alt) 25%, var(--paper) 50%, var(--paper-alt) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: 200% 0
-    }
-
-    100% {
-        background-position: -200% 0
-    }
-}
-
-/* Form helpers */
-.form-row-2 {
+.form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: var(--space-4);
 }
 
-/* Modal actions */
-.modal-actions {
+.modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--paper-alt);
+    gap: var(--space-3);
+    padding: var(--space-5) var(--space-6);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface-2);
 }
 
-.modal-box--sm {
-    max-width: 400px;
-}
-
-@media (max-width: 480px) {
-    .form-row-2 {
-        grid-template-columns: 1fr;
-    }
-
-    .toolbar {
+@media (max-width: 640px) {
+    .rooms-toolbar {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .toolbar .search-bar-wrap {
-        max-width: 100%;
+    .form-row {
+        grid-template-columns: 1fr;
     }
 }

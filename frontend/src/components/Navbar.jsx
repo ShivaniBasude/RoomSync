@@ -1,8 +1,7 @@
-import { NavLink, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import './Navbar.css'
+/* components/Navbar.jsx */
+import { Link, useLocation } from 'react-router-dom'
 
-const NAV_LINKS = [
+const NAV = [
     { to: '/', label: 'Dashboard' },
     { to: '/rooms', label: 'Rooms' },
     { to: '/students', label: 'Students' },
@@ -10,81 +9,70 @@ const NAV_LINKS = [
 ]
 
 export default function Navbar() {
-    const [scrolled, setScrolled] = useState(false)
-    const [menuOpen, setMenuOpen] = useState(false)
-    const location = useLocation()
-
-    useEffect(() => {
-        const handler = () => setScrolled(window.scrollY > 8)
-        window.addEventListener('scroll', handler)
-        return () => window.removeEventListener('scroll', handler)
-    }, [])
-
-    // close mobile menu on route change
-    useEffect(() => { setMenuOpen(false) }, [location])
+    const { pathname } = useLocation()
 
     return (
-        <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}>
-            <div className="navbar-inner">
-                {/* Logo */}
-                <NavLink to="/" className="navbar-logo">
-                    <span className="navbar-logo-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <rect x="2" y="3" width="9" height="9" rx="2" fill="currentColor" opacity="0.9" />
-                            <rect x="13" y="3" width="9" height="9" rx="2" fill="currentColor" opacity="0.55" />
-                            <rect x="2" y="14" width="9" height="9" rx="2" fill="currentColor" opacity="0.55" />
-                            <rect x="13" y="14" width="9" height="9" rx="2" fill="currentColor" opacity="0.25" />
-                        </svg>
+        <nav style={{
+            position: 'sticky', top: 0, zIndex: 100,
+            background: 'rgba(246,244,241,.94)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            borderBottom: '1px solid var(--border)',
+        }}>
+            <div style={{
+                maxWidth: 1280, margin: '0 auto',
+                padding: '0 40px', height: 66,
+                display: 'flex', alignItems: 'center', gap: 32,
+            }}>
+
+                {/* Brand */}
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
+                    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+                        <rect x="1" y="1" width="11" height="11" rx="3" fill="var(--accent)" />
+                        <rect x="16" y="1" width="11" height="11" rx="3" fill="var(--primary)" opacity=".55" />
+                        <rect x="1" y="16" width="11" height="11" rx="3" fill="var(--primary)" opacity=".35" />
+                        <rect x="16" y="16" width="11" height="11" rx="3" fill="var(--accent)" opacity=".65" />
+                    </svg>
+                    <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontWeight: 600, color: 'var(--primary)' }}>
+                        Room<em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Sync</em>
                     </span>
-                    <span className="navbar-logo-text">Room<strong>Sync</strong></span>
-                </NavLink>
+                </Link>
 
-                {/* Desktop nav */}
-                <nav className="navbar-links">
-                    {NAV_LINKS.map(({ to, label }) => (
-                        <NavLink
-                            key={to}
-                            to={to}
-                            end={to === '/'}
-                            className={({ isActive }) =>
-                                `navbar-link${isActive ? ' navbar-link--active' : ''}`
-                            }
-                        >
-                            {label}
-                        </NavLink>
-                    ))}
-                </nav>
+                {/* Links */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                    {NAV.map(({ to, label }) => {
+                        const active = pathname === to
+                        return (
+                            <Link key={to} to={to} style={{
+                                padding: '6px 14px',
+                                borderRadius: 'var(--r-md)',
+                                fontSize: '.87rem',
+                                fontWeight: active ? 600 : 400,
+                                color: active ? 'var(--primary)' : 'var(--text-2)',
+                                textDecoration: 'none',
+                                background: active ? 'var(--surface)' : 'transparent',
+                                boxShadow: active ? 'var(--sh-sm)' : 'none',
+                                display: 'flex', alignItems: 'center', gap: 6,
+                            }}>
+                                {label}
+                                {active && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
+                            </Link>
+                        )
+                    })}
+                </div>
 
-                {/* Right side */}
-                <div className="navbar-right">
-                    <span className="navbar-badge">Admin</span>
-                    <button
-                        className={`navbar-hamburger${menuOpen ? ' open' : ''}`}
-                        onClick={() => setMenuOpen(o => !o)}
-                        aria-label="Toggle menu"
-                    >
-                        <span /><span /><span />
-                    </button>
+                {/* Admin */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '5px 14px',
+                    background: 'var(--primary)', color: '#fff',
+                    borderRadius: 'var(--r-full)',
+                    fontSize: '.78rem', fontWeight: 600,
+                }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
+                    Admin
                 </div>
             </div>
-
-            {/* Mobile menu */}
-            {menuOpen && (
-                <nav className="navbar-mobile-menu">
-                    {NAV_LINKS.map(({ to, label }) => (
-                        <NavLink
-                            key={to}
-                            to={to}
-                            end={to === '/'}
-                            className={({ isActive }) =>
-                                `navbar-mobile-link${isActive ? ' navbar-mobile-link--active' : ''}`
-                            }
-                        >
-                            {label}
-                        </NavLink>
-                    ))}
-                </nav>
-            )}
-        </header>
+        </nav>
     )
 }
