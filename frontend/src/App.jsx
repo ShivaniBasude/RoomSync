@@ -1,36 +1,36 @@
-/* App.jsx */
+// frontend/src/App.jsx
 import { Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
-import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import Rooms from './pages/Rooms'
-import Students from './pages/Students'
-import Allocation from './pages/Allocation'
+import Navbar from './components/Navbar.jsx'
+import Home from './pages/Home.jsx'
+import Rooms from './pages/Rooms.jsx'
+import Students from './pages/Students.jsx'
+import Allocation from './pages/Allocation.jsx'
 
 export default function App() {
     const [rooms, setRooms] = useState([])
     const [students, setStudents] = useState([])
     const [allocations, setAllocations] = useState([])
 
-    /* ── Rooms ───────────────────────────────────── */
-    const addRoom = (r) => setRooms(prev => [...prev, r])
-    const editRoom = (r) => setRooms(prev => prev.map(x => x.id === r.id ? r : x))
+    // Rooms
+    const addRoom = (r) => setRooms(p => [...p, { ...r, id: Date.now() }])
+    const editRoom = (r) => setRooms(p => p.map(x => x.id === r.id ? r : x))
     const deleteRoom = (id) => {
-        setRooms(prev => prev.filter(x => x.id !== id))
-        setAllocations(prev => prev.filter(a => a.roomId !== id))
+        setRooms(p => p.filter(x => x.id !== id))
+        setAllocations(p => p.filter(a => a.roomId !== id))
     }
 
-    /* ── Students ────────────────────────────────── */
-    const addStudent = (s) => setStudents(prev => [...prev, s])
-    const editStudent = (s) => setStudents(prev => prev.map(x => x.id === s.id ? s : x))
+    // Students
+    const addStudent = (s) => setStudents(p => [...p, { ...s, id: Date.now() }])
+    const editStudent = (s) => setStudents(p => p.map(x => x.id === s.id ? s : x))
     const deleteStudent = (id) => {
-        setStudents(prev => prev.filter(x => x.id !== id))
-        setAllocations(prev => prev.filter(a => a.studentId !== id))
+        setStudents(p => p.filter(x => x.id !== id))
+        setAllocations(p => p.filter(a => a.studentId !== id))
     }
 
-    /* ── Allocations ─────────────────────────────── */
-    const allocate = (a) => setAllocations(prev => [...prev, a])
-    const deallocate = (id) => setAllocations(prev => prev.filter(a => a.id !== id))
+    // Allocations
+    const allocate = (a) => setAllocations(p => [...p, { ...a, id: Date.now() }])
+    const deallocate = (id) => setAllocations(p => p.filter(a => a.id !== id))
 
     const shared = { rooms, students, allocations }
 
