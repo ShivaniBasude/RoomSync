@@ -218,8 +218,32 @@ def update_student(student_id: int, data: StudentCreate, db: Session = Depends(g
 def delete_student(student_id: int, db: Session = Depends(get_db), _=Depends(auth.require_admin)):
     s = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not s: raise HTTPException(status_code=404, detail="Student not found")
-    db.delete(s); db.commit()
-    return {"detail": "Student deleted"}
+    # Remove allocation if exists
+    if s.allocation:
+        s.allocation.room  # touch to load
+        db.delete(s.allocation)
+        db.flush()
+    # Remove waitlist entry if exists
+    if s.waitlist:
+        db.delete(s.waitlist)
+        db.flush()
+    # Remove room requests
+    for req in s.requests:
+        db.delete(req)
+    db.flush()
+    # Remove linked user account (login credentials) if exists
+    linked_user_id = s.user_id
+    db.delete(s)
+    db.flush()
+    if linked_user_id:
+        user = db.query(models.User).filter(models.User.id == linked_user_id).first()
+        if user:
+            # Delete notifications for this user
+            db.query(models.Notification).filter(models.Notification.user_id == linked_user_id).delete()
+            db.delete(user)
+    db.commit()
+    return {"detail": "Student and login account deleted successfully"}
+
 
 # ── Allocations ──────────────────────────────────────────
 @app.get("/allocations")
