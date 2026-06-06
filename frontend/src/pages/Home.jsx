@@ -1,131 +1,173 @@
-// frontend/src/pages/Home.jsx
-// No separate CSS file — all styles from index.css classes + inline
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { getAnalytics } from '../api/api'
+import { useAuth } from '../context/AuthContext'
+import toast from 'react-hot-toast'
 
-const ACC = ['var(--accent)', 'var(--green)', 'var(--blue)', 'var(--red)']
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 18) return 'Good afternoon'
+  return 'Good evening'
+}
 
-export default function Home({ rooms = [], students = [], allocations = [] }) {
-    const cap = rooms.reduce((s, r) => s + (r.capacity || 1), 0)
-    const allocated = allocations.length
-    const available = rooms.filter(r => allocations.filter(a => a.roomId === r.id).length < (r.capacity || 1)).length
-    const pending = students.filter(s => !allocations.find(a => a.studentId === s.id)).length
-    const occupancy = cap > 0 ? Math.round((allocated / cap) * 100) : 0
+function StatCard({ label, value, icon, accentColor, sub, delay }) {
+  return (
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border-light)',
+      borderLeft: `4px solid ${accentColor}`,
+      borderRadius: 'var(--r-md)',
+      boxShadow: 'var(--sh-md)',
+      padding: '22px 24px',
+      display: 'flex', alignItems: 'flex-start', gap: 16,
+      animation: `fadeUp .5s var(--ease) ${delay}ms both`,
+      transition: 'box-shadow 200ms, transform 200ms',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--sh-lg)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
+    >
+      <div style={{
+        width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+        background: `${accentColor}18`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '1.4rem',
+      }}>
+        {icon}
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 4 }}>
+          {label}
+        </p>
+        <p style={{ fontFamily: 'var(--serif)', fontSize: '2rem', fontWeight: 400, color: 'var(--text)', lineHeight: 1 }}>
+          {value ?? '—'}
+        </p>
+        {sub && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>{sub}</p>}
+      </div>
+    </div>
+  )
+}
 
-    const STATS = [
-        { label: 'Total Rooms', value: rooms.length, sub: `${available} available`, icon: '🏠' },
-        { label: 'Students', value: students.length, sub: `${allocated} allocated`, icon: '👥' },
-        { label: 'Occupancy Rate', value: `${occupancy}%`, sub: 'of students housed', icon: '📊' },
-        { label: 'Pending', value: pending, sub: 'awaiting allocation', icon: '⏳' },
-    ]
+function QuickCard({ to, icon, title, desc, delay }) {
+  return (
+    <Link to={to} style={{ textDecoration: 'none', display: 'block', animation: `fadeUp .5s var(--ease) ${delay}ms both` }}>
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border-light)',
+        borderRadius: 'var(--r-md)',
+        boxShadow: 'var(--sh-md)',
+        padding: '24px',
+        display: 'flex', alignItems: 'center', gap: 16,
+        transition: 'all 200ms var(--ease)',
+      }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = 'var(--sh-lg)' }}
+        onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = '' }}
+      >
+        <div style={{
+          width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+          background: 'var(--bg-darker)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1.4rem',
+        }}>
+          {icon}
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', fontWeight: 400, color: 'var(--text)', marginBottom: 2 }}>{title}</p>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{desc}</p>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </Link>
+  )
+}
 
-    const QUICK = [
-        { to: '/rooms', title: 'Rooms', desc: 'Add, edit, or remove rooms', icon: '🏠' },
-        { to: '/students', title: 'Students', desc: 'Manage student records', icon: '👤' },
-        { to: '/allocation', title: 'Allocation', desc: 'Assign students to rooms', icon: '🔗' },
-    ]
+export default function Home() {
+  const [data,    setData]    = useState(null)
+  const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
+  const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
-    return (
-        <div className="page">
+  useEffect(() => {
+    getAnalytics()
+      .then(r => setData(r.data))
+      .catch(() => toast.error('Could not load statistics'))
+      .finally(() => setLoading(false))
+  }, [])
 
-            {/* ── Hero ── */}
-            <div style={{
-                display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-                gap: 20, marginBottom: 44, paddingBottom: 28, borderBottom: '1px solid var(--border)',
-            }}>
-                <div>
-                    <p className="eyebrow">Hostel Management</p>
-                    <h1 style={{ fontFamily: 'var(--serif)', fontSize: '3rem', fontWeight: 700, color: 'var(--primary)', lineHeight: 1.1, letterSpacing: '-.02em' }}>
-                        Room<em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Sync</em>
-                    </h1>
-                    <p style={{ marginTop: 8, fontSize: '1rem', color: 'var(--text-2)', fontWeight: 300 }}>
-                        Hostel room allocation &amp; management system
-                    </p>
-                </div>
-                <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-                    <Link to="/rooms" className="btn btn-primary">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                            <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
-                        Manage Rooms
-                    </Link>
-                    <Link to="/students" className="btn btn-outline">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                        </svg>
-                        View Students
-                    </Link>
-                </div>
-            </div>
+  const stats = data ? [
+    { label: 'Total Rooms',     value: data.total_rooms,     icon: '🏠', accentColor: '#2D6A4F', sub: `${data.available_rooms} currently available`, delay: 0 },
+    { label: 'Students',        value: data.total_students,  icon: '👥', accentColor: '#1B6CA8', sub: `${data.allocated} allocated`,                  delay: 60 },
+    { label: 'Occupancy',       value: `${data.occupancy_rate}%`, icon: '📊', accentColor: '#D97706', sub: 'of total capacity',                       delay: 120 },
+    { label: 'Pending',         value: data.pending_requests || 0, icon: '⏳', accentColor: '#9E2A2B', sub: 'awaiting allocation',                    delay: 180 },
+  ] : []
 
-            {/* ── Stats ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 44 }}>
-                {STATS.map((s, i) => (
-                    <StatCard key={i} {...s} color={ACC[i]} delay={i * 60} />
-                ))}
-            </div>
+  return (
+    <div className="page">
 
-            {/* ── Quick access ── */}
-            <p style={{ fontSize: '.69rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 14 }}>
-                Quick Access
+      {/* Header */}
+      <div style={{ marginBottom: 40, paddingBottom: 28, borderBottom: '1px solid var(--border-light)' }}>
+        <p className="eyebrow" style={{ marginBottom: 6 }}>{today}</p>
+        <h1 style={{
+          fontFamily: 'var(--serif)', fontSize: '2.8rem',
+          fontWeight: 400, color: 'var(--text)', lineHeight: 1.1, marginBottom: 8,
+        }}>
+          {getGreeting()}, {user?.name?.split(' ')[0] || 'Admin'}
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
+          Here's what's happening in your hostel today.
+        </p>
+      </div>
+
+      {/* Stats */}
+      {loading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 40 }}>
+          {[0,1,2,3].map(i => (
+            <div key={i} className="shimmer" style={{ height: 120, borderRadius: 'var(--r-md)' }}/>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 40 }}>
+          {stats.map(s => <StatCard key={s.label} {...s}/>)}
+        </div>
+      )}
+
+      {/* Quick access */}
+      <div style={{ marginBottom: 16 }}>
+        <p className="eyebrow" style={{ marginBottom: 16 }}>Quick Access</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
+          <QuickCard to="/rooms"      icon="🏠" title="Manage Rooms"    desc="Add, edit and configure hostel rooms"   delay={0}  />
+          <QuickCard to="/students"   icon="👥" title="View Students"   desc="Browse and manage all student records" delay={60} />
+          <QuickCard to="/allocation" icon="🔗" title="Assign Rooms"    desc="Allocate students to available rooms"  delay={120}/>
+        </div>
+      </div>
+
+      {/* Analytics teaser */}
+      {data && (
+        <div style={{
+          marginTop: 28,
+          background: 'var(--surface)',
+          border: '1px solid var(--border-light)',
+          borderRadius: 'var(--r-md)',
+          boxShadow: 'var(--sh-sm)',
+          padding: '20px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          animation: 'fadeUp .5s var(--ease) 300ms both',
+        }}>
+          <div>
+            <p style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', color: 'var(--text)', marginBottom: 2 }}>
+              Hostel at {data.occupancy_rate}% occupancy
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
-                {QUICK.map((q, i) => (
-                    <QuickCard key={i} {...q} delay={200 + i * 60} />
-                ))}
-            </div>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              {data.allocated} beds filled · {data.available_rooms} rooms open · {data.waitlisted || 0} on waitlist
+            </p>
+          </div>
+          <Link to="/analytics" className="btn btn-outline btn-sm">
+            View Analytics →
+          </Link>
         </div>
-    )
-}
-
-function StatCard({ label, value, sub, icon, color, delay }) {
-    return (
-        <div className="card" style={{
-            padding: '20px', position: 'relative', overflow: 'hidden',
-            animation: `fadeUp .5s var(--ease) ${delay}ms both`,
-            transition: 'box-shadow 200ms var(--ease), transform 200ms var(--ease)',
-            cursor: 'default',
-        }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--sh-md)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
-        >
-            <div style={{ position: 'absolute', left: 0, top: 0, width: 4, height: '100%', background: color, borderRadius: '4px 0 0 4px', opacity: .8 }} />
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 'var(--r-md)', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', flexShrink: 0 }}>
-                    {icon}
-                </div>
-                <div>
-                    <p style={{ fontSize: '.68rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 5 }}>{label}</p>
-                    <p style={{ fontFamily: 'var(--serif)', fontSize: '1.9rem', fontWeight: 600, color: 'var(--primary)', lineHeight: 1 }}>{value}</p>
-                    <p style={{ fontSize: '.77rem', color: 'var(--muted)', marginTop: 3 }}>{sub}</p>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function QuickCard({ to, title, desc, icon, delay }) {
-    return (
-        <Link to={to} style={{ textDecoration: 'none', animation: `fadeUp .5s var(--ease) ${delay}ms both`, display: 'block' }}>
-            <div className="card" style={{
-                padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14,
-                transition: 'all 200ms var(--ease)', cursor: 'pointer',
-            }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--sh-md)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = '' }}
-            >
-                <div style={{ width: 44, height: 44, borderRadius: 'var(--r-md)', background: 'var(--accent-pale)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
-                    {icon}
-                </div>
-                <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: 'var(--serif)', fontSize: '.98rem', fontWeight: 600, color: 'var(--primary)', marginBottom: 2 }}>{title}</p>
-                    <p style={{ fontSize: '.82rem', color: 'var(--text-2)' }}>{desc}</p>
-                </div>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-            </div>
-        </Link>
-    )
+      )}
+    </div>
+  )
 }

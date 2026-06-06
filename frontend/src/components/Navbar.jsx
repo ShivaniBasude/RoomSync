@@ -1,80 +1,118 @@
-// frontend/src/components/Navbar.jsx
-// No CSS import needed — uses only CSS variables defined in index.css
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import NotificationBell from './NotificationBell.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
+import toast from 'react-hot-toast'
 
 const LINKS = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/rooms', label: 'Rooms' },
-    { to: '/students', label: 'Students' },
-    { to: '/allocation', label: 'Allocation' },
+  { to: '/',           label: 'Dashboard' },
+  { to: '/rooms',      label: 'Rooms' },
+  { to: '/students',   label: 'Students' },
+  { to: '/allocation', label: 'Allocation' },
+  { to: '/analytics',  label: 'Analytics' },
 ]
 
 export default function Navbar() {
-    const { pathname } = useLocation()
+  const { pathname } = useLocation()
+  const { user, logout, isAdmin } = useAuth()
+  const navigate = useNavigate()
 
-    return (
-        <nav style={{
-            position: 'sticky', top: 0, zIndex: 200,
-            background: 'rgba(246,244,241,.94)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-            borderBottom: '1px solid var(--border)',
+  const handleLogout = () => {
+    logout()
+    toast.success('Logged out successfully')
+    navigate('/login')
+  }
+
+  // If not logged in, don't show navbar
+  if (!user) return null
+
+  // If not admin, we only show home/portal
+  const navLinks = isAdmin ? LINKS : [{ to: '/student', label: 'My Portal' }]
+
+  return (
+    <nav style={{
+      position: 'sticky', top: 0, zIndex: 1000,
+      background: 'var(--nav-bg)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      borderBottom: '1px solid var(--border)',
+      boxShadow: 'var(--sh-sm)',
+    }}>
+      <div style={{
+        maxWidth: 1280, margin: '0 auto',
+        padding: '0 40px', height: 70,
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+
+        {/* Brand/Logo (Left) */}
+        <Link to={isAdmin ? '/' : '/student'} style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          textDecoration: 'none',
         }}>
-            <div style={{
-                maxWidth: 1280, margin: '0 auto', padding: '0 40px',
-                height: 66, display: 'flex', alignItems: 'center', gap: 28,
-            }}>
+          <span style={{
+            fontFamily: 'var(--serif)', fontSize: '1.45rem',
+            color: 'var(--primary)', letterSpacing: '-0.02em',
+            fontWeight: 400,
+          }}>
+            RoomSync
+          </span>
+        </Link>
 
-                {/* ── Brand ── */}
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-                    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-                        <rect x="1" y="1" width="11" height="11" rx="3" fill="var(--accent)" />
-                        <rect x="16" y="1" width="11" height="11" rx="3" fill="var(--primary)" opacity=".55" />
-                        <rect x="1" y="16" width="11" height="11" rx="3" fill="var(--primary)" opacity=".35" />
-                        <rect x="16" y="16" width="11" height="11" rx="3" fill="var(--accent)" opacity=".65" />
-                    </svg>
-                    <span style={{
-                        fontFamily: 'var(--serif)', fontSize: '1.22rem', fontWeight: 600,
-                        color: 'var(--primary)', letterSpacing: '-.01em',
-                    }}>
-                        Room<em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Sync</em>
-                    </span>
-                </Link>
+        {/* Links (Center) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          {navLinks.map(({ to, label }) => {
+            const active = pathname === to
+            return (
+              <Link key={to} to={to} style={{
+                position: 'relative',
+                padding: '8px 0',
+                fontSize: '0.9rem',
+                fontWeight: active ? 600 : 400,
+                color: active ? 'var(--primary)' : 'var(--text-muted)',
+                textDecoration: 'none',
+                transition: 'color 150ms',
+              }}>
+                {label}
+                {active && (
+                  <span style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    height: 2, background: 'var(--primary)',
+                    borderRadius: 2,
+                  }}/>
+                )}
+              </Link>
+            )
+          })}
+        </div>
 
-                {/* ── Nav links ── */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                    {LINKS.map(({ to, label }) => {
-                        const active = pathname === to
-                        return (
-                            <Link key={to} to={to} style={{
-                                padding: '6px 14px', borderRadius: 'var(--r-md)',
-                                fontSize: '.87rem', fontWeight: active ? 600 : 400,
-                                color: active ? 'var(--primary)' : 'var(--text-2)',
-                                textDecoration: 'none',
-                                background: active ? 'var(--surface)' : 'transparent',
-                                boxShadow: active ? 'var(--sh-sm)' : 'none',
-                                display: 'flex', alignItems: 'center', gap: 6,
-                                transition: 'all 150ms var(--ease)',
-                            }}>
-                                {label}
-                                {active && (
-                                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
-                                )}
-                            </Link>
-                        )
-                    })}
-                </div>
+        {/* Right side (Admin badge & actions) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <ThemeToggle />
+          <NotificationBell />
 
-                {/* ── Admin badge ── */}
-                <div style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '5px 14px', background: 'var(--primary)', color: '#fff',
-                    borderRadius: 'var(--r-f)', fontSize: '.78rem', fontWeight: 600,
-                }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
-                    Admin
-                </div>
-            </div>
-        </nav>
-    )
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {isAdmin ? (
+              <span className="badge bg-green" style={{
+                padding: '5px 12px', fontSize: '0.75rem', fontWeight: 600
+              }}>
+                Admin
+              </span>
+            ) : (
+              <span className="badge bg-blue" style={{
+                padding: '5px 12px', fontSize: '0.75rem', fontWeight: 600
+              }}>
+                Student
+              </span>
+            )}
+            
+            <button className="btn btn-outline btn-sm" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  )
 }
