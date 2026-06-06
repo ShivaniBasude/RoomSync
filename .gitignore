@@ -1,0 +1,33 @@
+# Local environment secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Databases
+*.db
+*.sqlite3
+
+# Python caches and virtualenvs
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+
+# Node dependencies and build folders
+node_modules/
+dist/
+build/
+.next/
+.cache/
+.vercel
+
+# Editor/OS settings
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
