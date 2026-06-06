@@ -72,17 +72,6 @@ The React app starts at `http://localhost:5173`
 
 ---
 
-## 🔐 Default Admin Credentials
-
-```
-Email:    admin@roomsync.com
-Password: admin123
-```
-
-> ⚠️ Change these before deploying to production.
-
----
-
 ## 📡 API Overview
 
 | Method | Endpoint           | Description                  | Auth     |
